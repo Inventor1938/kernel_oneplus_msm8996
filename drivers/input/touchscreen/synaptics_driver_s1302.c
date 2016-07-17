@@ -1950,6 +1950,11 @@ static int choice_gpio_function(struct synaptics_ts_data *ts)
 		ret = i2c_smbus_write_byte_data(ts->client, 0x37, 0x80);
 	}
 	return ret;
+bool s1302_is_keypad_stopped(void)
+{
+	struct synaptics_ts_data *ts = tc_g;
+
+	return ts->stop_keypad;
 }
 
 static void synaptics_input_event(struct input_handle *handle,
