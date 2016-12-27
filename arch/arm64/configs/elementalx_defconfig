@@ -359,6 +359,7 @@ CONFIG_PCI_LABEL=y
 #
 CONFIG_LCD_NOTIFIER=y
 CONFIG_ADRENO_IDLER=y
+CONFIG_STATE_NOTIFIER=y 
 
 #
 # ARM errata workarounds via the alternatives framework
