@@ -1913,43 +1913,6 @@ err_pinctrl_get:
 	return retval;
 }
 
-static int choice_gpio_function(struct synaptics_ts_data *ts)
-{
-	int ret=0;
-	i2c_smbus_write_byte_data(ts->client, 0xff, 0x0);
-	ret = i2c_smbus_write_byte_data(ts->client, 0x37, 0x81);
-	if(ret < 0){
-		ret = i2c_smbus_write_byte_data(ts->client, 0x37, 0x81);
-	}
-	msleep(5);
-	synaptics_rmi4_i2c_write_byte(ts->client, 0xff, 0x00 );
-	synaptics_rmi4_i2c_read_word(ts->client, 0x13);
-	msleep(5);
-	if (gpio_is_valid(ts->irq_gpio)) {
-		/* configure touchscreen irq gpio */
-		ret = gpio_request(ts->irq_gpio,"s1302_int");
-		if (ret) {
-			TPD_ERR("unable to request gpio [%d]\n",ts->irq_gpio);
-		}
-		ret = gpio_direction_input(ts->irq_gpio);
-		msleep(50);
-		ts->irq = gpio_to_irq(ts->irq_gpio);
-	}
-	TPD_ERR("synaptic:ts->irq is %d\n",ts->irq);
-	if(!gpio_get_value(ts->irq_gpio)){
-                msleep(2);
-		if(!gpio_get_value(ts->irq_gpio))
-			ts->using_polling = 1;
-		else
-			ts->using_polling = 0;
-	}else{
-		ts->using_polling = 0;
-	}
-	ret = i2c_smbus_write_byte_data(ts->client, 0x37, 0x80);
-	if(ret < 0){
-		ret = i2c_smbus_write_byte_data(ts->client, 0x37, 0x80);
-	}
-	return ret;
 bool s1302_is_keypad_stopped(void)
 {
 	struct synaptics_ts_data *ts = tc_g;
@@ -1993,6 +1956,7 @@ static int synaptics_input_connect(struct input_handler *handler,
 
 	return 0;
 
+
 err1:
 	input_unregister_handle(handle);
 err2:
@@ -2017,14 +1981,53 @@ static const struct input_device_id synaptics_input_ids[] = {
 };
 
 static struct input_handler synaptics_input_handler = {
-	.event		= synaptics_input_event,
+	.event = synaptics_input_event,
 	.connect	= synaptics_input_connect,
 	.disconnect	= synaptics_input_disconnect,
-	.name		= "syna_input_handler",
+	.name = "syna_input_handler",
 	.id_table	= synaptics_input_ids,
 };
 
-static int synaptics_ts_probe(struct i2c_client *client, const struct i2c_device_id *id)
+static int choice_gpio_function(struct synaptics_ts_data *ts)
+{
+	int ret=0;
+	i2c_smbus_write_byte_data(ts->client, 0xff, 0x0);
+	ret = i2c_smbus_write_byte_data(ts->client, 0x37, 0x81);
+	if(ret < 0){
+		ret = i2c_smbus_write_byte_data(ts->client, 0x37, 0x81);
+	}
+	msleep(5);
+	synaptics_rmi4_i2c_write_byte(ts->client, 0xff, 0x00 );
+	synaptics_rmi4_i2c_read_word(ts->client, 0x13);
+	msleep(5);
+	if (gpio_is_valid(ts->irq_gpio)) {
+		/* configure touchscreen irq gpio */
+		ret = gpio_request(ts->irq_gpio,"s1302_int");
+		if (ret) {
+			TPD_ERR("unable to request gpio [%d]\n",ts->irq_gpio);
+		}
+		ret = gpio_direction_input(ts->irq_gpio);
+		msleep(50);
+		ts->irq = gpio_to_irq(ts->irq_gpio);
+	}
+	TPD_ERR("synaptic:ts->irq is %d\n",ts->irq);
+	if(!gpio_get_value(ts->irq_gpio)){
+                msleep(2);
+		if(!gpio_get_value(ts->irq_gpio))
+			ts->using_polling = 1;
+		else
+			ts->using_polling = 0;
+	}else{
+		ts->using_polling = 0;
+	}
+	ret = i2c_smbus_write_byte_data(ts->client, 0x37, 0x80);
+	if(ret < 0){
+		ret = i2c_smbus_write_byte_data(ts->client, 0x37, 0x80);
+	}
+	return ret;
+}
+
+ static int synaptics_ts_probe(struct i2c_client *client, const struct i2c_device_id *id)
 {
 #ifdef CONFIG_SYNAPTIC_RED
 	struct remotepanel_data *premote_data = NULL;
