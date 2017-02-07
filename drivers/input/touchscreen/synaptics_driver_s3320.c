@@ -1302,7 +1302,7 @@ Left2RightSwip:%d Right2LeftSwip:%d Up2DownSwip:%d Down2UpSwip:%d\n",
 			input_sync(gesture_dev);
 
 		//traditional s2w using userspace doubletap gesture from OnePlus (checks proximity sensor and vibrates)
-		} else if (DouTap_gesture) {
+		} else if (double_tap_enable) {
 			gesture_upload = DouTap;
 			keyCode = KEY_DOUBLE_TAP;
 			input_report_key(ts->input_dev, keyCode, 1);
@@ -1699,7 +1699,7 @@ static ssize_t gesture_switch_write_func(struct file *file, const char __user *p
 
 static void gesture_enable(struct synaptics_ts_data *ts)
 {
-	ts->gesture_enable = gestures_switch || s2w_switch || dt2w_switch ||
+	ts->gesture_enable = gestures_switch || s2w_switch || dt2w_switch
                         || double_tap_enable || letter_o_enable || down_arrow_enable || up_arrow_enable
 			|| left_arrow_enable || right_arrow_enable || double_swipe_enable || right_swipe_enable
 			|| left_swipe_enable || down_swipe_enable || up_swipe_enable ? 1 : 0;
